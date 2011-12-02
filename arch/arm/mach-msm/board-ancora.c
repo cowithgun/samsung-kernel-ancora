@@ -739,7 +739,7 @@ static ssize_t tma300_vkeys_show(struct kobject *kobj,
 	return sprintf(buf,
 	__stringify(EV_KEY) ":" __stringify(KEY_BACK) ":50:842:80:100"
 	":" __stringify(EV_KEY) ":" __stringify(KEY_MENU) ":170:842:80:100"
-	":" __stringify(EV_KEY) ":" __stringify(KEY_HOME) ":290:842:80:100"
+	":" __stringify(EV_KEY) ":" __stringify(KEY_HOMEPAGE) ":290:842:80:100"
 	":" __stringify(EV_KEY) ":" __stringify(KEY_SEARCH) ":410:842:80:100"
 	"\n");
 }
@@ -987,13 +987,13 @@ static int pm8058_pwm_enable(struct pwm_device *pwm, int ch, int on)
  */
 static const struct sec_input_bridge_mkey ancora_mkey_map[] = {
     { .type = EV_KEY, .code = KEY_VOLUMEUP      },
-    { .type = EV_KEY, .code = KEY_HOME          },
+    { .type = EV_KEY, .code = KEY_HOMEPAGE      },
     { .type = EV_KEY, .code = KEY_VOLUMEDOWN    },
     { .type = EV_KEY, .code = KEY_VOLUMEUP      },
-    { .type = EV_KEY, .code = KEY_HOME          },
+    { .type = EV_KEY, .code = KEY_HOMEPAGE      },
     { .type = EV_KEY, .code = KEY_VOLUMEDOWN    },
     { .type = EV_KEY, .code = KEY_VOLUMEUP      },
-    { .type = EV_KEY, .code = KEY_HOME          },
+    { .type = EV_KEY, .code = KEY_HOMEPAGE      },
     { .type = EV_KEY, .code = KEY_VOLUMEDOWN    },
 };
 
