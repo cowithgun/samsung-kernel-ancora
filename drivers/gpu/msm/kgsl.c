@@ -1748,7 +1748,7 @@ static const struct {
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_GPUMEM_ALLOC,
 			kgsl_ioctl_gpumem_alloc, 0),
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_TIMESTAMP_EVENT,
-			kgsl_ioctl_timestamp_event, 0),
+			kgsl_ioctl_timestamp_event, 1),
 };
 
 static long kgsl_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
