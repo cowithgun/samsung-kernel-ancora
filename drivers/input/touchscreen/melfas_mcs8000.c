@@ -950,7 +950,8 @@ static void melfas_ts_work_func(struct work_struct *work)
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_POSITION_X, g_Mtouch_info[i].posX);
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_POSITION_Y, g_Mtouch_info[i].posY);
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_TOUCH_MAJOR, g_Mtouch_info[i].strength);
-            input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_WIDTH_MAJOR, g_Mtouch_info[i].width);
+            input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_PRESSURE, g_Mtouch_info[i].width);
+            input_report_key(melfas_mcs8000_ts->input_dev, BTN_TOUCH, g_Mtouch_info[i].strength);
             input_mt_sync(melfas_mcs8000_ts->input_dev);
             
 #if DEBUG_PRINT
@@ -2464,6 +2465,7 @@ void melfas_mcs8000_ts_gen_touch_up(void)
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_POSITION_Y, g_Mtouch_info[i].posY);
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
             input_report_abs(melfas_mcs8000_ts->input_dev, ABS_MT_WIDTH_MAJOR, 0);
+            input_report_key(melfas_mcs8000_ts->input_dev, BTN_TOUCH, 0);
             input_sync(melfas_mcs8000_ts->input_dev);
         }
     }   
