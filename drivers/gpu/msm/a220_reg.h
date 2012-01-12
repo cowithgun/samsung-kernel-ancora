@@ -26,12 +26,15 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+#ifndef __A205_REG_H
+#define __A205_REG_H
 
-#ifndef __ADRENO_POSTMORTEM_H
-#define __ADRENO_POSTMORTEM_H
+#define REG_LEIA_PC_INDX_OFFSET          REG_VGT_INDX_OFFSET
+#define REG_LEIA_PC_VERTEX_REUSE_BLOCK_CNTL REG_VGT_VERTEX_REUSE_BLOCK_CNTL
+#define REG_LEIA_PC_MAX_VTX_INDX         REG_VGT_MAX_VTX_INDX
+#define REG_LEIA_RB_LRZ_VSC_CONTROL	 0x2209
+#define REG_LEIA_GRAS_CONTROL            0x2210
+#define REG_LEIA_VSC_BIN_SIZE            0x0C01
+#define REG_LEIA_VSC_PIPE_DATA_LENGTH_7  0x0C1D
 
-struct kgsl_device;
-
-int adreno_postmortem_dump(struct kgsl_device *device, int manual);
-
-#endif /* __ADRENO_POSTMORTEM_H */
+#endif /*__A205_REG_H */
