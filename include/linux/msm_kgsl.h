@@ -1,41 +1,8 @@
-/* Copyright (c) 2002,2007-2011, Code Aurora Forum. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, and the entire permission notice in its entirety,
- *    including the disclaimer of warranties.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote
- *    products derived from this software without specific prior
- *    written permission.
- *
- * ALTERNATIVELY, this product may be distributed under the terms of
- * the GNU General Public License, version 2, in which case the provisions
- * of the GPL version 2 are required INSTEAD OF the BSD license.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ALL OF
- * WHICH ARE HEREBY DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
- * USE OF THIS SOFTWARE, EVEN IF NOT ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
- *
- */
 #ifndef _MSM_KGSL_H
 #define _MSM_KGSL_H
 
 #define KGSL_VERSION_MAJOR        3
-#define KGSL_VERSION_MINOR        5
+#define KGSL_VERSION_MINOR        8
 
 /*context flags */
 #define KGSL_CONTEXT_SAVE_GMEM	1
@@ -59,6 +26,9 @@
 #define KGSL_FLAGS_SOFT_RESET  0x00000100
 
 #define KGSL_MAX_PWRLEVELS 5
+
+#define KGSL_CONVERT_TO_MBPS(val) \
+	(val*1000*1000U)
 
 /* device id */
 enum kgsl_deviceid {
@@ -182,6 +152,8 @@ struct kgsl_device_platform_data {
 	struct kgsl_clk_data clk;
 	/* imem_clk_name is for 3d only, not used in 2d devices */
 	struct kgsl_grp_clk_name imem_clk_name;
+	const char *iommu_user_ctx_name;
+	const char *iommu_priv_ctx_name;
 };
 
 #endif
@@ -353,6 +325,18 @@ struct kgsl_sharedmem_free {
 #define IOCTL_KGSL_SHAREDMEM_FREE \
 	_IOW(KGSL_IOC_TYPE, 0x21, struct kgsl_sharedmem_free)
 
+struct kgsl_cff_user_event {
+	unsigned char cff_opcode;
+	unsigned int op1;
+	unsigned int op2;
+	unsigned int op3;
+	unsigned int op4;
+	unsigned int op5;
+	unsigned int __pad[2];
+};
+
+#define IOCTL_KGSL_CFF_USER_EVENT \
+	_IOW(KGSL_IOC_TYPE, 0x31, struct kgsl_cff_user_event)
 
 struct kgsl_gmem_desc {
 	unsigned int x;
@@ -431,6 +415,39 @@ struct kgsl_gpumem_alloc {
 
 #define IOCTL_KGSL_GPUMEM_ALLOC \
 	_IOWR(KGSL_IOC_TYPE, 0x2f, struct kgsl_gpumem_alloc)
+
+struct kgsl_cff_syncmem {
+	unsigned int gpuaddr;
+	unsigned int len;
+	unsigned int __pad[2]; /* For future binary compatibility */
+};
+
+#define IOCTL_KGSL_CFF_SYNCMEM \
+	_IOW(KGSL_IOC_TYPE, 0x30, struct kgsl_cff_syncmem)
+
+/*
+ * A timestamp event allows the user space to register an action following an
+ * expired timestamp.
+ */
+
+struct kgsl_timestamp_event {
+	int type;                /* Type of event (see list below) */
+	unsigned int timestamp;  /* Timestamp to trigger event on */
+	unsigned int context_id; /* Context for the timestamp */
+	void *priv;              /* Pointer to the event specific blob */
+	size_t len;              /* Size of the event specific blob */
+};
+
+#define IOCTL_KGSL_TIMESTAMP_EVENT \
+	_IOW(KGSL_IOC_TYPE, 0x31, struct kgsl_timestamp_event)
+
+/* A genlock timestamp event releases an existing lock on timestamp expire */
+
+#define KGSL_TIMESTAMP_EVENT_GENLOCK 1
+
+struct kgsl_timestamp_event_genlock {
+	int handle; /* Handle of the genlock lock to release */
+};
 
 #ifdef __KERNEL__
 #ifdef CONFIG_MSM_KGSL_DRM
