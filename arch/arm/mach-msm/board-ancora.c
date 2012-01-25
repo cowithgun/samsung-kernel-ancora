@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2011, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2009-2010, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -5289,7 +5289,7 @@ static struct platform_device android_pmem_audio_device = {
 
 static struct resource kgsl_3d0_resources[] = {
 	{
-		.name  = KGSL_3D0_REG_MEMORY,
+		.name = KGSL_3D0_REG_MEMORY,
 		.start = 0xA3500000, /* 3D GRP address */
 		.end = 0xA351ffff,
 		.flags = IORESOURCE_MEM,
@@ -5311,15 +5311,11 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 			},
 			{
 				.gpu_freq = 192000000,
-				.bus_freq = 153000000,
-			},
-                        {
-				.gpu_freq = 192000000,
 				.bus_freq = 0,
 			},
 		},
 		.init_level = 0,
-		.num_levels = 3,
+		.num_levels = 2,
 		.set_grp_async = set_grp3d_async,
 		.idle_timeout = HZ/20,
 		.nap_allowed = true,
@@ -5346,7 +5342,6 @@ static struct platform_device msm_kgsl_3d0 = {
 	},
 };
 
-#ifdef CONFIG_MSM_KGSL_2D
 static struct resource kgsl_2d0_resources[] = {
 	{
 		.name = KGSL_2D0_REG_MEMORY,
@@ -6469,9 +6464,7 @@ static struct platform_device *devices[] __initdata = {
 	&msm_bt_power_device,//sc47.yun
 	&msm_bluesleep_device, //sc47.yun
 	&msm_kgsl_3d0,
-#ifdef CONFIG_MSM_KGSL_2D
-	&msm_kgsl_2d0,
-#endif
+        &msm_kgsl_2d0,
 #if defined (CONFIG_SENSOR_S5K4ECGX)
 	&msm_camera_sensor_s5k4ecgx,
 #endif
