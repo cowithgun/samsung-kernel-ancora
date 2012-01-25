@@ -5389,7 +5389,6 @@ static struct platform_device msm_kgsl_2d0 = {
 		.platform_data = &kgsl_2d0_pdata,
 	},
 };
-#endif
 
 #if defined(CONFIG_CRYPTO_DEV_QCRYPTO) || \
 		defined(CONFIG_CRYPTO_DEV_QCRYPTO_MODULE) || \
