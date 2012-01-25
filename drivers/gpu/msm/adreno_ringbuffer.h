@@ -1,14 +1,29 @@
 /* Copyright (c) 2002,2007-2011, Code Aurora Forum. All rights reserved.
- * Copyright (C) 2011 Sony Ericsson Mobile Communications AB.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ *       copyright notice, this list of conditions and the following
+ *       disclaimer in the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 #ifndef __ADRENO_RINGBUFFER_H
@@ -45,7 +60,7 @@ struct kgsl_rbmemptrs {
 #define GSL_RB_MEMPTRS_WPTRPOLL_OFFSET \
 	(offsetof(struct kgsl_rbmemptrs, wptr_poll))
 
-struct adreno_ringbuffer {
+struct kgsl_ringbuffer {
 	struct kgsl_device *device;
 	uint32_t flags;
 
@@ -61,6 +76,9 @@ struct adreno_ringbuffer {
 	unsigned int rptr; /* read pointer offset in dwords from baseaddr */
 	uint32_t timestamp;
 };
+
+/* dword base address of the GFX decode space */
+#define GSL_HAL_SUBBLOCK_OFFSET(reg) ((unsigned int)((reg) - (0x2000)))
 
 #define GSL_RB_WRITE(ring, gpuaddr, data) \
 	do { \
@@ -84,7 +102,7 @@ struct adreno_ringbuffer {
 #else
 #define GSL_RB_MEMPTRS_SCRATCH_MASK 0x0
 #define GSL_RB_INIT_TIMESTAMP(rb) \
-		adreno_regwrite((rb)->device->id, REG_CP_TIMESTAMP, 0)
+		kgsl_yamato_regwrite((rb)->device->id, REG_CP_TIMESTAMP, 0)
 
 #endif /* GSL_RB_USE_MEMTIMESTAMP */
 
@@ -99,44 +117,42 @@ struct adreno_ringbuffer {
 #define GSL_RB_CNTL_NO_UPDATE 0x1 /* disable */
 #define GSL_RB_GET_READPTR(rb, data) \
 	do { \
-		adreno_regread((rb)->device->id, REG_CP_RB_RPTR, (data)); \
+		kgsl_yamato_regread((rb)->device->id, REG_CP_RB_RPTR, (data)); \
 	} while (0)
 #endif /* GSL_RB_USE_MEMRPTR */
 
 #define GSL_RB_CNTL_POLL_EN 0x0 /* disable */
 
-int adreno_ringbuffer_issueibcmds(struct kgsl_device_private *dev_priv,
+int kgsl_ringbuffer_issueibcmds(struct kgsl_device_private *dev_priv,
 				struct kgsl_context *context,
-				struct kgsl_ibdesc *ibdesc,
-				unsigned int numibs,
+				struct kgsl_ibdesc *ibdesc, unsigned int numibs,
 				uint32_t *timestamp,
 				unsigned int flags);
 
-int adreno_ringbuffer_init(struct kgsl_device *device);
+int kgsl_ringbuffer_init(struct kgsl_device *device);
 
-int adreno_ringbuffer_start(struct adreno_ringbuffer *rb,
-				unsigned int init_ram);
+int kgsl_ringbuffer_start(struct kgsl_ringbuffer *rb, unsigned int init_ram);
 
-void adreno_ringbuffer_stop(struct adreno_ringbuffer *rb);
+int kgsl_ringbuffer_stop(struct kgsl_ringbuffer *rb);
 
-void adreno_ringbuffer_close(struct adreno_ringbuffer *rb);
+int kgsl_ringbuffer_close(struct kgsl_ringbuffer *rb);
 
-void adreno_ringbuffer_issuecmds(struct kgsl_device *device,
+void kgsl_ringbuffer_issuecmds(struct kgsl_device *device,
 					unsigned int flags,
 					unsigned int *cmdaddr,
 					int sizedwords);
 
 void kgsl_cp_intrcallback(struct kgsl_device *device);
 
-int adreno_ringbuffer_extract(struct adreno_ringbuffer *rb,
+int kgsl_ringbuffer_extract(struct kgsl_ringbuffer *rb,
 				unsigned int *temp_rb_buffer,
 				int *rb_size);
 
 void
-adreno_ringbuffer_restore(struct adreno_ringbuffer *rb, unsigned int *rb_buff,
+kgsl_ringbuffer_restore(struct kgsl_ringbuffer *rb, unsigned int *rb_buff,
 			int num_rb_contents);
 
-static inline int adreno_ringbuffer_count(struct adreno_ringbuffer *rb,
+static inline int kgsl_ringbuffer_count(struct kgsl_ringbuffer *rb,
 	unsigned int rptr)
 {
 	if (rb->wptr >= rptr)
@@ -149,6 +165,12 @@ static inline unsigned int adreno_ringbuffer_inc_wrapped(unsigned int val,
 							unsigned int size)
 {
 	return (val + sizeof(unsigned int)) % size;
+}
+
+static inline int
+kgsl_allocate_contig(struct kgsl_memdesc *memdesc, size_t size)
+{
+	return kgsl_sharedmem_alloc_coherent(memdesc, size);
 }
 
 #endif  /* __ADRENO_RINGBUFFER_H */

@@ -14,13 +14,12 @@
 #include <linux/delay.h>
 #include <linux/debugfs.h>
 #include <linux/uaccess.h>
-#include <linux/io.h>
 
 #include "kgsl.h"
 #include "adreno_postmortem.h"
 #include "adreno.h"
 
-#include "a2xx_reg.h"
+#include "a200_reg.h"
 
 unsigned int kgsl_cff_dump_enable;
 int kgsl_pm_regs_enabled;
@@ -36,7 +35,7 @@ static int pm_dump_set(void *data, u64 val)
 
 	if (val) {
 		mutex_lock(&device->mutex);
-		adreno_postmortem_dump(device, 1);
+		kgsl_postmortem_dump(device, 1);
 		mutex_unlock(&device->mutex);
 	}
 
@@ -107,7 +106,7 @@ static int kgsl_hex_dump(const char *prefix, int c, uint8_t *data,
 	ss = snprintf(linebuf, sizeof(linebuf), prefix, c);
 	hex_dump_to_buffer(data, linec, rowc, 4, linebuf+ss,
 		sizeof(linebuf)-ss, 0);
-	strlcat(linebuf, "\n", sizeof(linebuf));
+	strncat(linebuf, "\n", sizeof(linebuf));
 	linebuf[sizeof(linebuf)-1] = 0;
 	ss = strlen(linebuf);
 	if (copy_to_user(buff, linebuf, ss+1))
@@ -131,7 +130,7 @@ static ssize_t kgsl_ib_dump_read(
 	if (!ppos || !device || !kgsl_ib_base)
 		return 0;
 
-	kgsl_regread(device, MH_MMU_PT_BASE, &pt_base);
+	kgsl_regread(device, REG_MH_MMU_PT_BASE, &pt_base);
 	base_addr = kgsl_sharedmem_convertaddr(device, pt_base, kgsl_ib_base,
 		&ib_memsize);
 
@@ -396,8 +395,8 @@ static void kgsl_mh_reg_read_fill(struct kgsl_device *device, int i,
 	int j;
 
 	for (j = 0; j < linec; ++j) {
-		kgsl_regwrite(device, MH_DEBUG_CTRL, i+j);
-		kgsl_regread(device, MH_DEBUG_DATA, vals+j);
+		kgsl_regwrite(device, REG_MH_DEBUG_CTRL, i+j);
+		kgsl_regread(device, REG_MH_DEBUG_DATA, vals+j);
 	}
 }
 
@@ -419,10 +418,8 @@ static const struct file_operations kgsl_mh_debug_fops = {
 	.read = kgsl_mh_debug_read,
 };
 
-void adreno_debugfs_init(struct kgsl_device *device)
+void kgsl_yamato_debugfs_init(struct kgsl_device *device)
 {
-	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-
 	if (!device->d_debugfs || IS_ERR(device->d_debugfs))
 		return;
 
@@ -438,8 +435,6 @@ void adreno_debugfs_init(struct kgsl_device *device)
 			    &kgsl_mh_debug_fops);
 	debugfs_create_file("cff_dump", 0644, device->d_debugfs, device,
 			    &kgsl_cff_dump_enable_fops);
-	debugfs_create_u32("wait_timeout", 0644, device->d_debugfs,
-		&adreno_dev->wait_timeout);
 
 	/* Create post mortem control files */
 
